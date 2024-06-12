@@ -1,0 +1,62 @@
+version: "3.8"
+services:
+  www:
+    build: .
+    ports: 
+      - "8001:80"
+    volumes:
+      - ./www:/var/www/html/
+    depends_on:
+      - mysql_db
+      - postgres_db
+    networks:
+      - default
+  mysql_db:
+    image: mysql:5.7.13
+    ports: 
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: myDb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: test
+      MYSQL_ROOT_PASSWORD: test
+    volumes:
+      - ./dump/mysql/myDb.sql:/docker-entrypoint-initdb.d/myDb.sql
+      - persistent:/var/lib/mysql
+    networks:
+      - default
+  phpmyadmin:
+    image: phpmyadmin
+    ports:
+      - "8000:80"
+    environment:
+      MYSQL_USER: user
+      MYSQL_PASSWORD: test
+      MYSQL_ROOT_PASSWORD: test
+    depends_on:
+      - mysql_db
+    networks:
+      - default
+
+  postgres_db:
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: newDB
+      POSTGRES_USER: pupa007
+      POSTGRES_PASSWORD: test  
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - ./dump/postgres/newDB.sql:/docker-entrypoint-initdb.d/newDB.sql
+      - pdb:/var/lib/postgresql/data
+    networks:
+      - default
+    restart: always
+
+networks:
+  default:
+
+volumes:
+  persistent:
+  pdb:
